@@ -1,4 +1,5 @@
 import Html exposing (Html, div, h2, text)
+import Board exposing (..)
 
 main =
   Html.program
@@ -10,12 +11,9 @@ main =
 
 -- MODEL
 
-type Player
-  = X
-  | O
 
 type alias Model =
-  { turn : Player
+  { board : Board
   , xwins : Int
   , owins : Int
   }
@@ -23,7 +21,7 @@ type alias Model =
 
 init : (Model, Cmd Msg)
 init =
-  (Model X 0 0, Cmd.none)
+  (Model Board.initialBoard 0 0, Cmd.none)
 
 -- VIEW
 
