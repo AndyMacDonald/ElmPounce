@@ -28,7 +28,8 @@ init =
 view : Model -> Html Msg
 view model =
   div []
-    [ h2 [] [text "Pounce"]
+    [ h2 [] [text "Pounce"],
+    Board.render model.board
     ]
 
 -- UPDATE
