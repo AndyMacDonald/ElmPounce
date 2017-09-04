@@ -1,4 +1,4 @@
-module Board exposing (Model, init, view, Msg(Clicked, Reset), update, Player(XMove, OMove), statusText)
+module Board exposing (Model, init, view, Msg(Clicked, Reset), update, statusText)
 
 import Set exposing (..)
 import Html exposing (Html)
@@ -9,6 +9,10 @@ import Svg.Events exposing (..)
 type Player
   = XMove
   | OMove
+  | XBlocked
+  | OBlocked
+  | XPounced
+  | OPounced
 
 type Msg
     = Clicked Int
@@ -61,28 +65,56 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Clicked idx ->
-            let
-                squares = model.squares
-                newNext = case model.next of
-                    XMove -> OMove
-                    OMove -> XMove
-                newSquares = case model.next of
-                    XMove -> 
-                            { blocked = insert squares.xpos squares.blocked
+            case model.next of
+                XMove ->
+                    let
+                        squares = model.squares
+                        newNext = OMove
+                        from = squares.xpos
+                        newSquares = 
+                             { blocked = insert from squares.blocked
                             , xpos = idx
                             , opos = squares.opos
                             }
-                    OMove ->
-                            { blocked = insert squares.opos squares.blocked
+                        newMoves = Set.filter (legal newSquares from) (Set.fromList allSquares)
+                        realNext =
+                            if idx == squares.opos then
+                                XPounced
+                            else if isEmpty newMoves then
+                                XBlocked
+                            else
+                                OMove
+                    in
+                        { squares = newSquares
+                        , next = realNext
+                        , moves = newMoves
+                        }
+                            
+                OMove -> 
+                     let
+                        squares = model.squares
+                        newNext = XMove
+                        from = squares.opos
+                        newSquares = 
+                             { blocked = insert from squares.blocked
                             , xpos = squares.xpos
                             , opos = idx
                             }
-                newMoves = Set.filter (legal newSquares newNext) (Set.fromList allSquares)
-            in
-                { squares = newSquares
-                , next = newNext
-                , moves = newMoves
-                }
+                        newMoves = Set.filter (legal newSquares from) (Set.fromList allSquares)
+                        realNext =
+                            if idx == squares.xpos then
+                                OPounced
+                            else if isEmpty newMoves then
+                                OBlocked
+                            else
+                                XMove
+                    in
+                        { squares = newSquares
+                        , next = realNext
+                        , moves = newMoves
+                        }
+                _ -> model
+
         Reset -> model
 
 statusText : Model -> String
@@ -90,17 +122,18 @@ statusText model =
     case model.next of
         XMove -> "Green to move"
         OMove -> "Red to move"
+        XBlocked -> "Green is blocked. Red wins!"
+        OBlocked -> "Red is blocked. Green wins!"
+        XPounced -> "Green pounced on red. Green wins!"
+        OPounced -> "Red pounced on green. Red wins!"
 
 -- HELPER FUNCTIONS
 
 -- UPDATE HELPERS
 
-legal : Squares -> Player -> Int -> Bool
-legal squares next to =
+legal : Squares -> Int -> Int -> Bool
+legal squares from to =
     let
-        from = case next of
-            XMove -> squares.xpos
-            OMove -> squares.opos
         (fx, fy) = idxToXY from
         (tx, ty) = idxToXY to
         (dx, dy) = (tx - fx, ty - fy)
