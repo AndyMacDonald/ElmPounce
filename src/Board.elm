@@ -52,7 +52,11 @@ renderSquares idx square =
             --Player.O -> "red"
             
     in
-        rect [Svg.Events.onClick (Clicked idx), x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color] []
+        case square of
+        Empty ->
+            rect [Svg.Events.onClick (Clicked idx), x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color] []
+        Blocked ->
+            rect [x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color] []
 
 update : Msg -> Model -> Model
 update msg model =
