@@ -76,7 +76,7 @@ update msg model =
                             , xpos = idx
                             , opos = squares.opos
                             }
-                        newMoves = Set.filter (legal newSquares from) (Set.fromList allSquares)
+                        newMoves = Set.filter (legal newSquares squares.opos) (Set.fromList allSquares)
                         realNext =
                             if idx == squares.opos then
                                 XPounced
@@ -100,7 +100,7 @@ update msg model =
                             , xpos = squares.xpos
                             , opos = idx
                             }
-                        newMoves = Set.filter (legal newSquares from) (Set.fromList allSquares)
+                        newMoves = Set.filter (legal newSquares squares.xpos) (Set.fromList allSquares)
                         realNext =
                             if idx == squares.xpos then
                                 OPounced
