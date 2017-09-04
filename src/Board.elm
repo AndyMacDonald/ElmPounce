@@ -76,11 +76,14 @@ update msg model =
                             , xpos = idx
                             , opos = squares.opos
                             }
-                        newMoves = Set.filter (legal newSquares squares.opos) (Set.fromList allSquares)
+                        myMoves = Set.filter (legal newSquares newSquares.xpos) (Set.fromList allSquares)
+                        newMoves = Set.filter (legal newSquares newSquares.opos) (Set.fromList allSquares)
                         realNext =
                             if idx == squares.opos then
                                 XPounced
                             else if isEmpty newMoves then
+                                OBlocked
+                            else if isEmpty myMoves then
                                 XBlocked
                             else
                                 OMove
@@ -100,11 +103,14 @@ update msg model =
                             , xpos = squares.xpos
                             , opos = idx
                             }
-                        newMoves = Set.filter (legal newSquares squares.xpos) (Set.fromList allSquares)
+                        myMoves = Set.filter (legal newSquares newSquares.opos) (Set.fromList allSquares)
+                        newMoves = Set.filter (legal newSquares newSquares.xpos) (Set.fromList allSquares)
                         realNext =
                             if idx == squares.xpos then
                                 OPounced
                             else if isEmpty newMoves then
+                                XBlocked
+                            else if isEmpty myMoves then
                                 OBlocked
                             else
                                 XMove
