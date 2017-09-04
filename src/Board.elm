@@ -1,4 +1,4 @@
-module Board exposing (Model, init, view, Msg(Clicked, Reset), update, Player(XMove, OMove))
+module Board exposing (Model, init, view, Msg(Clicked, Reset), update, Player(XMove, OMove), statusText)
 
 import Set exposing (..)
 import Html exposing (Html)
@@ -84,6 +84,12 @@ update msg model =
                 , moves = newMoves
                 }
         Reset -> model
+
+statusText : Model -> String
+statusText model =
+    case model.next of
+        XMove -> "Green to move"
+        OMove -> "Red to move"
 
 -- HELPER FUNCTIONS
 
