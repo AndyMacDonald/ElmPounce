@@ -17,28 +17,26 @@ type Square
 -- This first implementation is very squishy with too many degrees of 
 -- freedom. Tighten up later.
 type alias Board =
-    { squares : Array (Array Square)
+    { squares : Array Square
     , next : Player
     }
 
 initialBoard : Board
 initialBoard =
-    { squares = Array.repeat 7 (Array.repeat 7 Empty)
+    { squares = Array.repeat 49 Empty
     , next = X
     }
 
 render : Board -> Html.Html msg
 render board = 
     svg [ viewBox "0 0 72 72", width "300px" ]
-      (Array.indexedMap renderRow board.squares |> foldl List.append [])
+      (Array.indexedMap renderSquares board.squares |> toList)
 
-renderRow : Int -> Array Square -> List (Svg msg)
-renderRow idx row =
-    (Array.indexedMap (renderColumn idx) row |> Array.toList)
-
-renderColumn : Int -> Int -> Square -> Svg msg
-renderColumn yidx xidx square =
+renderSquares : Int -> Square -> Svg msg
+renderSquares idx square =
     let
+        xidx = idx % 7
+        yidx = idx // 7
         xpos = toString (10 * xidx + 1)
         ypos = toString (10 * yidx + 1)
         color = case square of
