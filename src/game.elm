@@ -25,7 +25,7 @@ init =
 
 -- VIEW
 
-view : Model -> Html Msg
+view : Model -> Html Board.Msg
 view model =
   div []
     [ h2 [] [text "Pounce"],
@@ -34,12 +34,9 @@ view model =
 
 -- UPDATE
 
-type Msg
-  = Click Int Int
-
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Board.Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    (model, Cmd.none)
+    ({model | board = Board.update msg model.board}, Cmd.none)
 
 -- SUBSCRIPTIONS
 
