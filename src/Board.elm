@@ -1,7 +1,6 @@
 module Board exposing (Model, init, view, Msg(Clicked), update, Player(XMove, OMove))
 
 import Array exposing (..)
-import Dict exposing (..)
 import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -47,7 +46,7 @@ view board =
 
     in
         svg [ viewBox "0 0 72 72", width "300px" ]
-        (Array.indexedMap (renderSquare (legal board fromIdx)) board.squares |> Array.toList)
+        (Array.indexedMap (renderSquare (legal board fromIdx)) board.squares |> toList)
 
 renderSquare : (Int -> Bool) -> Int -> Square -> Svg Msg
 renderSquare legalTo idx square =
@@ -120,7 +119,18 @@ legal model from to =
             False -- Must move like a queen in chess
         else
             -- No blockers between from and to
-            True
+            not (blocked model from to (Basics.max (abs dx) (abs dy)))
+
+blocked : Model -> Int -> Int -> Int -> Bool
+blocked model from to count =
+    let
+        delta = to - from
+        dstep = delta // count -- should be integral
+        idxs = List.map (\x -> from + x * dstep) (List.range 1 count)
+        squares = List.map (\x -> get x model.squares) idxs
+
+    in
+        List.any (\x -> x == Just Blocked) squares
 
 makeHandler : (Int -> Bool) -> Int -> Square -> Maybe (Svg.Attribute Msg)
 makeHandler legalTo to square =
