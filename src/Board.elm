@@ -1,6 +1,6 @@
 module Board exposing (Model, init, view, Msg(Clicked), update, Player(XMove, OMove))
 
-import Array exposing (..)
+import Set exposing (..)
 import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -23,7 +23,7 @@ type Msg =
 -- This first implementation is very squishy with too many degrees of 
 -- freedom. Tighten up later.
 type alias Model =
-    { squares : Array Square
+    { blocked : Set Int
     , next : Player
     , xpos : Int
     , opos : Int
@@ -31,7 +31,7 @@ type alias Model =
 
 init : Model
 init =
-    { squares = Array.repeat 49 Empty
+    { blocked = Set.empty
     , next = XMove
     , xpos = -1
     , opos = -1
@@ -39,27 +39,17 @@ init =
 
 view : Model -> Html Msg
 view board = 
-    let
-        fromIdx = case board.next of
-            XMove -> board.xpos
-            OMove -> board.opos
+    svg [ viewBox "0 0 72 72", width "300px" ]
+        (List.map (renderSquare board) (List.range 0 48))
 
-    in
-        svg [ viewBox "0 0 72 72", width "300px" ]
-        (Array.indexedMap (renderSquare (legal board fromIdx)) board.squares |> toList)
-
-renderSquare : (Int -> Bool) -> Int -> Square -> Svg Msg
-renderSquare legalTo idx square =
+renderSquare : Model -> Int -> Svg Msg
+renderSquare model idx =
     let
         (xidx, yidx) = idxToXY(idx)
         xpos = toString (10 * xidx + 1)
         ypos = toString (10 * yidx + 1)
-        color = case square of
-            Empty -> "white"
-            Blocked -> "black"
-            X -> "green"
-            O -> "red"
-        handler = makeHandler legalTo idx square
+        color = squareColor model idx
+        handler = makeHandler model idx
         attributes = [x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color]
             
     in
@@ -75,13 +65,13 @@ update msg model =
         Clicked idx ->
             case model.next of
                 XMove ->
-                    { squares = Array.set model.xpos Blocked (Array.set idx X model.squares)
+                    { blocked = insert model.xpos model.blocked
                     , next = OMove
                     , xpos = idx
                     , opos = model.opos
                     }
                 OMove ->
-                    { squares = Array.set model.opos Blocked (Array.set idx O model.squares)
+                    { blocked = insert model.opos model.blocked
                     , next = XMove
                     , xpos = model.xpos
                     , opos = idx
@@ -100,9 +90,12 @@ xyToIdx x y =
     else
         Just (y * 7 + x)
 
-legal : Model -> Int -> Int -> Bool
-legal model from to =
+legal : Model -> Int -> Bool
+legal model to =
     let
+        from = case model.next of
+            XMove -> model.xpos
+            OMove -> model.opos
         (fx, fy) = idxToXY from
         (tx, ty) = idxToXY to
         (dx, dy) = (tx - fx, ty - fy)
@@ -127,14 +120,24 @@ blocked model from to count =
         delta = to - from
         dstep = delta // count -- should be integral
         idxs = List.map (\x -> from + x * dstep) (List.range 1 count)
-        squares = List.map (\x -> get x model.squares) idxs
 
     in
-        List.any (\x -> x == Just Blocked) squares
+        List.any (\x -> member x model.blocked) idxs
 
-makeHandler : (Int -> Bool) -> Int -> Square -> Maybe (Svg.Attribute Msg)
-makeHandler legalTo to square =
-    if square /= Blocked && legalTo to then
+makeHandler : Model -> Int -> Maybe (Svg.Attribute Msg)
+makeHandler model to =
+    if not (Set.member to model.blocked) && legal model to then
         Just (Svg.Events.onClick (Clicked to))
     else
         Nothing
+
+squareColor : Model -> Int -> String
+squareColor model idx =
+    if idx == model.xpos then
+        "green"
+    else if idx == model.opos then
+        "red"
+    else if member idx model.blocked then
+        "black"
+    else
+        "white"
