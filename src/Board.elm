@@ -109,10 +109,11 @@ legal model from to =
         (dx, dy) = (tx - fx, ty - fy)
 
     in
-        if model.next == XMove && from == -1 then
-            True -- first X move can go anywhere
-        else if model.next == OMove && from == -1 && to == model.xpos then
-            False -- first O move can't go on X
+        if from == -1 then -- First move for each side is a special case
+            (if to == model.xpos then -- can move anywhere except O not allow on top of X
+                False 
+             else
+                True)
         else if from == to then
             False -- Can't move to self
         else if dx /= 0 && dy /= 0 && abs(dx) /= abs(dy) then
