@@ -1,4 +1,4 @@
-module Board exposing (..)
+module Board exposing (Model, init, view)
 
 import Array exposing (..)
 import Html exposing (Html)
@@ -16,19 +16,19 @@ type Square
 -- The board
 -- This first implementation is very squishy with too many degrees of 
 -- freedom. Tighten up later.
-type alias Board =
+type alias Model =
     { squares : Array Square
     , next : Player
     }
 
-initialBoard : Board
-initialBoard =
+init : Model
+init =
     { squares = Array.repeat 49 Empty
     , next = X
     }
 
-render : Board -> Html.Html msg
-render board = 
+view : Model -> Html msg
+view board = 
     svg [ viewBox "0 0 72 72", width "300px" ]
       (Array.indexedMap renderSquares board.squares |> toList)
 

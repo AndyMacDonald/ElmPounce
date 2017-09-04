@@ -13,7 +13,7 @@ main =
 
 
 type alias Model =
-  { board : Board
+  { board : Board.Model
   , xwins : Int
   , owins : Int
   }
@@ -21,7 +21,7 @@ type alias Model =
 
 init : (Model, Cmd Msg)
 init =
-  (Model Board.initialBoard 0 0, Cmd.none)
+  (Model Board.init 0 0, Cmd.none)
 
 -- VIEW
 
@@ -29,7 +29,7 @@ view : Model -> Html Msg
 view model =
   div []
     [ h2 [] [text "Pounce"],
-    Board.render model.board
+    Board.view model.board
     ]
 
 -- UPDATE
