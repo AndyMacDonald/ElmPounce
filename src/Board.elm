@@ -1,20 +1,21 @@
 module Board exposing (Model, init, view, Msg(Clicked), update)
 
 import Array exposing (..)
+import Dict exposing (..)
 import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
 
 type Player
-  = X
-  | O
+  = XMove
+  | OMove
 
 type Square
   = Empty
+  | X
+  | O
   | Blocked
-  --| Player.X
-  --| Player.O
 
 type Msg = 
     Clicked Int
@@ -25,18 +26,22 @@ type Msg =
 type alias Model =
     { squares : Array Square
     , next : Player
+    , xpos : Int
+    , opos : Int
     }
 
 init : Model
 init =
     { squares = Array.repeat 49 Empty
-    , next = X
+    , next = XMove
+    , xpos = -1
+    , opos = -1
     }
 
 view : Model -> Html Msg
 view board = 
     svg [ viewBox "0 0 72 72", width "300px" ]
-      (Array.indexedMap renderSquares board.squares |> toList)
+      (Array.indexedMap renderSquares board.squares |> Array.toList)
 
 renderSquares : Int -> Square -> Svg Msg
 renderSquares idx square =
@@ -48,20 +53,37 @@ renderSquares idx square =
         color = case square of
             Empty -> "white"
             Blocked -> "black"
-            --Player.X -> "green"
-            --Player.O -> "red"
+            X -> "green"
+            O -> "red"
+        handler = case square of
+            Empty -> Just (Svg.Events.onClick (Clicked idx))
+            Blocked -> Nothing
+            X -> Just (Svg.Events.onClick (Clicked idx))
+            O -> Just (Svg.Events.onClick (Clicked idx))  
+        attributes = [x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color]
             
     in
-        case square of
-        Empty ->
-            rect [Svg.Events.onClick (Clicked idx), x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color] []
-        Blocked ->
-            rect [x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color] []
+        case handler of
+        Just callback ->
+            rect (callback :: attributes) []
+        Nothing ->
+            rect attributes []
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         Clicked idx ->
-            { model | squares = Array.set idx Blocked model.squares}
-    
+            case model.next of
+                XMove ->
+                    { squares = Array.set model.xpos Blocked (Array.set idx X model.squares)
+                    , next = OMove
+                    , xpos = idx
+                    , opos = model.opos
+                    }
+                OMove ->
+                    { squares = Array.set model.opos Blocked (Array.set idx O model.squares)
+                    , next = XMove
+                    , xpos = model.xpos
+                    , opos = idx
+                    }
     
