@@ -1,4 +1,4 @@
-module Board exposing (Model, init, view, Msg(Clicked), update)
+module Board exposing (Model, init, view, Msg(Clicked), update, Player(XMove, OMove))
 
 import Array exposing (..)
 import Dict exposing (..)

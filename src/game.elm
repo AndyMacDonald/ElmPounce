@@ -27,9 +27,17 @@ init =
 
 view : Model -> Html Board.Msg
 view model =
+  let
+    playText =
+        case model.board.next of
+          Board.XMove -> "Green to move"
+          Board.OMove -> "Red to move"
+  in
+      
   div []
-    [ h2 [] [text "Pounce"],
-    Board.view model.board
+    [ h2 [] [text "Pounce"]
+    , Board.view model.board
+    , Html.p [] [text playText]
     ]
 
 -- UPDATE
