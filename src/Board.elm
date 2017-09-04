@@ -77,40 +77,31 @@ update msg model =
                             , xpos = squares.xpos
                             , opos = idx
                             }
-                newModel =  { squares = newSquares
-                            , moves = Set.fromList allSquares
-                            , next = newNext
-                            }
+                newMoves = Set.filter (legal newSquares newNext) (Set.fromList allSquares)
             in
-                { newModel | moves = Set.filter (legal newModel) newModel.moves }
+                { squares = newSquares
+                , next = newNext
+                , moves = newMoves
+                }
         Reset -> model
 
 -- HELPER FUNCTIONS
 
-idxToXY : Int -> (Int, Int)
-idxToXY idx =
-    (idx % 7, idx // 7)
+-- UPDATE HELPERS
 
-xyToIdx : Int -> Int -> Maybe Int
-xyToIdx x y =
-    if x < 0 || x >= 7 || y < 0 || y >= 7 then
-        Nothing
-    else
-        Just (y * 7 + x)
-
-legal : Model -> Int -> Bool
-legal model to =
+legal : Squares -> Player -> Int -> Bool
+legal squares next to =
     let
-        from = case model.next of
-            XMove -> model.squares.xpos
-            OMove -> model.squares.opos
+        from = case next of
+            XMove -> squares.xpos
+            OMove -> squares.opos
         (fx, fy) = idxToXY from
         (tx, ty) = idxToXY to
         (dx, dy) = (tx - fx, ty - fy)
 
     in
         if from == -1 then -- First move for each side is a special case
-            (if to == model.squares.xpos then -- can move anywhere except O not allow on top of X
+            (if to == squares.xpos then -- can move anywhere except O not allow on top of X
                 False 
              else
                 True)
@@ -120,18 +111,19 @@ legal model to =
             False -- Must move like a queen in chess
         else
             -- No blockers between from and to
-            not (blocked model from to (Basics.max (abs dx) (abs dy)))
+            not (blocked squares from to (Basics.max (abs dx) (abs dy)))
 
-blocked : Model -> Int -> Int -> Int -> Bool
-blocked model from to count =
+blocked : Squares -> Int -> Int -> Int -> Bool
+blocked squares from to count =
     let
         delta = to - from
         dstep = delta // count -- should be integral
         idxs = List.map (\x -> from + x * dstep) (List.range 1 count)
 
     in
-        List.any (\x -> member x model.squares.blocked) idxs
+        List.any (\x -> member x squares.blocked) idxs
 
+-- VIEW HELPERS
 makeHandler : Model -> Int -> Maybe (Svg.Attribute Msg)
 makeHandler model to =
     if Set.member to model.moves then
@@ -150,6 +142,12 @@ squareColor squares idx =
     else
         "white"
 
+-- GENERAL HELPERS
+
 allSquares : List Int
 allSquares =
     List.range 0 48
+
+idxToXY : Int -> (Int, Int)
+idxToXY idx =
+    (idx % 7, idx // 7)
