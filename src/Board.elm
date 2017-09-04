@@ -1,4 +1,4 @@
-module Board exposing (Model, init, view, Msg(Clicked), update, Player(XMove, OMove))
+module Board exposing (Model, init, view, Msg(Clicked, Reset), update, Player(XMove, OMove))
 
 import Set exposing (..)
 import Html exposing (Html)
@@ -10,14 +10,9 @@ type Player
   = XMove
   | OMove
 
-type Square
-  = Empty
-  | X
-  | O
-  | Blocked
-
-type Msg = 
-    Clicked Int
+type Msg
+    = Clicked Int
+    | Reset
 
 -- The board
 -- This first implementation is very squishy with too many degrees of 
@@ -76,7 +71,8 @@ update msg model =
                     , xpos = model.xpos
                     , opos = idx
                     }
-
+        Reset -> model
+        
 -- HELPER FUNCTIONS
 
 idxToXY : Int -> (Int, Int)

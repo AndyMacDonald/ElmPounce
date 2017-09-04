@@ -1,4 +1,5 @@
-import Html exposing (Html, div, h2, text)
+import Html exposing (Html, div, h2, text, button)
+import Html.Events exposing (onClick)
 import Board exposing (..)
 
 main =
@@ -36,6 +37,7 @@ view model =
       
   div []
     [ h2 [] [text "Pounce"]
+    , button [ onClick Reset ] [ text "Reset" ]
     , Board.view model.board
     , Html.p [] [text playText]
     ]
@@ -44,7 +46,11 @@ view model =
 
 update : Board.Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    ({model | board = Board.update msg model.board}, Cmd.none)
+  case msg of
+    Clicked _ -> 
+      ({model | board = Board.update msg model.board}, Cmd.none)
+    Reset ->
+      (Model Board.init 0 0, Cmd.none)
 
 -- SUBSCRIPTIONS
 
