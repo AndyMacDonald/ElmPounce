@@ -191,11 +191,11 @@ xOrPouncedColor : Player -> Int -> Int -> String
 xOrPouncedColor player xpos opos =
     if xpos == opos then
         if player == XPounced then
-            "green"
+            "#00CC00"
         else
             "red"
     else
-        "green"
+        "#00CC00"
 
 -- GENERAL HELPERS
 
