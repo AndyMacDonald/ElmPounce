@@ -183,7 +183,7 @@ squareColor player squares idx =
     else if idx == squares.opos then
         "red"
     else if member idx squares.blocked then
-        "black"
+        "#222222"
     else
         "white"
 
