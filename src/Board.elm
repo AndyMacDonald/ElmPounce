@@ -50,10 +50,10 @@ renderSquare model idx =
         (xidx, yidx) = idxToXY(idx)
         xpos = toString (10 * xidx + 1)
         ypos = toString (10 * yidx + 1)
-        color = squareColor model.squares idx
+        color = squareColor model.next model.squares idx
         handler = makeHandler model idx
         attributes = [x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color]
-            
+
     in
         case handler of
         Just callback ->
@@ -176,16 +176,26 @@ makeHandler model to =
     else
         Nothing
 
-squareColor : Squares -> Int -> String
-squareColor squares idx =
+squareColor : Player -> Squares -> Int -> String
+squareColor player squares idx =
     if idx == squares.xpos then
-        "green"
+        xOrPouncedColor player squares.xpos squares.opos
     else if idx == squares.opos then
         "red"
     else if member idx squares.blocked then
         "black"
     else
         "white"
+
+xOrPouncedColor : Player -> Int -> Int -> String
+xOrPouncedColor player xpos opos =
+    if xpos == opos then
+        if player == XPounced then
+            "green"
+        else
+            "red"
+    else
+        "green"
 
 -- GENERAL HELPERS
 
