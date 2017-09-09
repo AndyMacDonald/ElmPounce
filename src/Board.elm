@@ -1,4 +1,4 @@
-module Board exposing (Model, init, view, Msg(Clicked, Reset), update, statusText)
+module Board exposing (Model, init, view, Msg(Clicked), update, statusText)
 
 import Set exposing (..)
 import Html exposing (Html)
@@ -16,7 +16,6 @@ type Player
 
 type Msg
     = Clicked Int
-    | Reset
 
 -- The board
 -- This first implementation is very squishy with too many degrees of 
@@ -120,8 +119,6 @@ update msg model =
                         , moves = newMoves
                         }
                 _ -> model
-
-        Reset -> model
 
 statusText : Model -> String
 statusText model =

@@ -1,4 +1,4 @@
-import Html exposing (Html, div, h2, text, button)
+import Html exposing (Html, div, h2, text, button, map)
 import Html.Events exposing (onClick)
 import Board exposing (..)
 
@@ -19,6 +19,9 @@ type alias Model =
   , owins : Int
   }
 
+type Msg
+  = Board Board.Msg
+  | Reset
 
 init : (Model, Cmd Msg)
 init =
@@ -26,22 +29,22 @@ init =
 
 -- VIEW
 
-view : Model -> Html Board.Msg
+view : Model -> Html Msg
 view model =
   div []
     [ h2 [] [text "Pounce"]
     , button [ onClick Reset ] [ text "Reset" ]
-    , Board.view model.board
+    , map (\a -> Board a) (Board.view model.board)
     , Html.p [] [text (statusText model.board)]
     ]
 
 -- UPDATE
 
-update : Board.Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Clicked _ -> 
-      ({model | board = Board.update msg model.board}, Cmd.none)
+    Board boardMsg -> 
+      ({model | board = Board.update boardMsg model.board}, Cmd.none)
     Reset ->
       (Model Board.init 0 0, Cmd.none)
 
