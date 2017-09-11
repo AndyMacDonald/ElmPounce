@@ -15,8 +15,6 @@ main =
 
 type alias Model =
   { board : Board.Model
-  , xwins : Int
-  , owins : Int
   }
 
 type Msg
@@ -25,7 +23,7 @@ type Msg
 
 init : (Model, Cmd Msg)
 init =
-  (Model Board.init 0 0, Cmd.none)
+  (Model Board.init, Cmd.none)
 
 -- VIEW
 
@@ -46,7 +44,7 @@ update msg model =
     Board boardMsg -> 
       ({model | board = Board.update boardMsg model.board}, Cmd.none)
     Reset ->
-      (Model Board.init 0 0, Cmd.none)
+      (Model Board.init, Cmd.none)
 
 -- SUBSCRIPTIONS
 

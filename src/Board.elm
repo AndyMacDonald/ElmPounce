@@ -20,20 +20,19 @@ type Msg
 -- The board
 -- This first implementation is very squishy with too many degrees of 
 -- freedom. Tighten up later.
-type alias Squares =
+type alias Model =
     { blocked : Set Int
     , xpos : Int
     , opos : Int
-    }
-type alias Model =
-    { squares : Squares
     , moves : Set Int
     , next : Player
     }
 
 init : Model
 init =
-    { squares = { blocked = Set.empty, xpos = -1, opos = -1 }
+    { blocked = Set.empty
+    , xpos = -1
+    , opos = -1
     , moves = Set.fromList allSquares
     , next = XMove
     }
@@ -49,7 +48,7 @@ renderSquare model idx =
         (xidx, yidx) = idxToXY(idx)
         xpos = toString (10 * xidx + 1)
         ypos = toString (10 * yidx + 1)
-        color = squareColor model.next model.squares idx
+        color = squareColor model idx
         handler = makeHandler model idx
         attributes = [x xpos, y ypos, width "10", height "10", stroke "black", strokeWidth "1", fill color]
 
@@ -67,18 +66,19 @@ update msg model =
             case model.next of
                 XMove ->
                     let
-                        squares = model.squares
                         newNext = OMove
-                        from = squares.xpos
-                        newSquares = 
-                             { blocked = insert from squares.blocked
+                        from = model.xpos
+                        newModel = 
+                            { blocked = insert from model.blocked
                             , xpos = idx
-                            , opos = squares.opos
+                            , opos = model.opos
+                            , moves = empty
+                            , next = newNext
                             }
-                        myMoves = Set.filter (legal newSquares newSquares.xpos) (Set.fromList allSquares)
-                        newMoves = Set.filter (legal newSquares newSquares.opos) (Set.fromList allSquares)
+                        myMoves = Set.filter (legal newModel newModel.xpos) (Set.fromList allSquares)
+                        newMoves = Set.filter (legal newModel newModel.opos) (Set.fromList allSquares)
                         realNext =
-                            if idx == squares.opos then
+                            if idx == model.opos then
                                 XPounced
                             else if isEmpty newMoves then
                                 OBlocked
@@ -87,25 +87,23 @@ update msg model =
                             else
                                 OMove
                     in
-                        { squares = newSquares
-                        , next = realNext
-                        , moves = newMoves
-                        }
+                        { newModel | next = realNext, moves = newMoves }
                             
                 OMove -> 
                      let
-                        squares = model.squares
                         newNext = XMove
-                        from = squares.opos
-                        newSquares = 
-                             { blocked = insert from squares.blocked
-                            , xpos = squares.xpos
+                        from = model.opos
+                        newModel = 
+                            { blocked = insert from model.blocked
+                            , xpos = model.xpos
                             , opos = idx
+                            , moves = empty
+                            , next = newNext
                             }
-                        myMoves = Set.filter (legal newSquares newSquares.opos) (Set.fromList allSquares)
-                        newMoves = Set.filter (legal newSquares newSquares.xpos) (Set.fromList allSquares)
+                        myMoves = Set.filter (legal newModel newModel.opos) (Set.fromList allSquares)
+                        newMoves = Set.filter (legal newModel newModel.xpos) (Set.fromList allSquares)
                         realNext =
-                            if idx == squares.xpos then
+                            if idx == model.xpos then
                                 OPounced
                             else if isEmpty newMoves then
                                 XBlocked
@@ -114,10 +112,7 @@ update msg model =
                             else
                                 XMove
                     in
-                        { squares = newSquares
-                        , next = realNext
-                        , moves = newMoves
-                        }
+                        { newModel | next = realNext, moves = newMoves }
                 _ -> model
 
 statusText : Model -> String
@@ -134,8 +129,8 @@ statusText model =
 
 -- UPDATE HELPERS
 
-legal : Squares -> Int -> Int -> Bool
-legal squares from to =
+legal : Model -> Int -> Int -> Bool
+legal model from to =
     let
         (fx, fy) = idxToXY from
         (tx, ty) = idxToXY to
@@ -143,7 +138,7 @@ legal squares from to =
 
     in
         if from == -1 then -- First move for each side is a special case
-            (if to == squares.xpos then -- can move anywhere except O not allow on top of X
+            (if to == model.xpos then -- can move anywhere except O not allow on top of X
                 False 
              else
                 True)
@@ -153,17 +148,17 @@ legal squares from to =
             False -- Must move like a queen in chess
         else
             -- No blockers between from and to
-            not (blocked squares from to (Basics.max (abs dx) (abs dy)))
+            not (blocked model from to (Basics.max (abs dx) (abs dy)))
 
-blocked : Squares -> Int -> Int -> Int -> Bool
-blocked squares from to count =
+blocked : Model -> Int -> Int -> Int -> Bool
+blocked model from to count =
     let
         delta = to - from
         dstep = delta // count -- should be integral
         idxs = List.map (\x -> from + x * dstep) (List.range 1 count)
 
     in
-        List.any (\x -> member x squares.blocked) idxs
+        List.any (\x -> member x model.blocked) idxs
 
 -- VIEW HELPERS
 makeHandler : Model -> Int -> Maybe (Svg.Attribute Msg)
@@ -173,13 +168,13 @@ makeHandler model to =
     else
         Nothing
 
-squareColor : Player -> Squares -> Int -> String
-squareColor player squares idx =
-    if idx == squares.xpos then
-        xOrPouncedColor player squares.xpos squares.opos
-    else if idx == squares.opos then
+squareColor : Model -> Int -> String
+squareColor model idx =
+    if idx == model.xpos then
+        xOrPouncedColor model.next model.xpos model.opos
+    else if idx == model.opos then
         "red"
-    else if member idx squares.blocked then
+    else if member idx model.blocked then
         "#222222"
     else
         "white"
