@@ -1,4 +1,4 @@
-module Board exposing (Model, init, view, Msg(Clicked), update, statusText)
+module Board exposing (Model, init, view, Msg(Clicked), update, statusText, Player(XMove, OMove, XBlocked, OBlocked, XPounced, OPounced))
 
 import Set exposing (..)
 import Html exposing (Html)
