@@ -67,12 +67,11 @@ update msg model =
         Robot ->
           let
             humanMove = Board.update boardMsg model.board
-            (score, next) = negamax scorer humanMove 2 1
+            next = nextMove humanMove
             robotMove
-              = if next == -1 then
-                  humanMove
-                else
-                  Board.update (Clicked next) humanMove
+                = case next of
+                  Just idx -> Board.update (Clicked idx) humanMove
+                  Nothing -> humanMove
           in
             ({model | board = robotMove}, Cmd.none)
 
@@ -93,27 +92,35 @@ subscriptions model =
 ----------------------
 -- NEGAMAX code for a robot to play against
 
+type alias Index = Int
+type alias Score = Int
+type alias Color = Int
+type alias Depth = Int
+
+nextMove : Board.Model -> Maybe Index
+nextMove board =
+    negamax scorer board 2 1 |> Tuple.second
+
 -- scoreFn returns board score from O's viewpoint
 -- board is current node in the tree
 -- depth is how many more layers to evaluate below this
 -- color is 1 for O and -1 for X (robot is always O)
 -- returns pair of (best score, number of square for that score)
-negamax : (Board.Model -> Int) -> Board.Model -> Int -> Int -> (Int, Int)
+negamax : (Board.Model -> Score) -> Board.Model -> Depth -> Color -> (Score, Maybe Index)
 negamax scoreFn board depth color =
   if depth == 0 || Set.isEmpty board.moves then
-    (color * scoreFn board, -1)
+    (color * scoreFn board, Nothing)
   else
     let
       candidates = List.map 
-                    (\x -> (-(Tuple.first (negamax scoreFn (Board.update (Clicked x) board) (depth - 1) -color)), x))
+                    (\x -> (-(Tuple.first (negamax scoreFn (Board.update (Clicked x) board) (depth - 1) -color)), Just x))
                     (Set.toList board.moves)
-      best = case (List.sortBy (\x -> -(Tuple.first x)) candidates |> List.head) of
-        Just x -> x
-        Nothing -> (-win, 0)
     in
-      best
+        case (List.sortBy (\x -> -(Tuple.first x)) candidates |> List.head) of
+            Just x -> x
+            Nothing -> (-win, Nothing)
 
-scorer : Board.Model -> Int
+scorer : Board.Model -> Score
 scorer board =
   case board.next of
     XMove -> -(Set.size board.moves)
@@ -123,6 +130,6 @@ scorer board =
     XBlocked -> win
     OBlocked -> -win
 
-win : Int
+win : Score
 win =
   1000000
