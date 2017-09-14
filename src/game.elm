@@ -3,6 +3,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Board exposing (..)
 import Set exposing (..)
+import Task exposing (..)
+import Process exposing (..)
+import Time exposing (..)
 
 main =
   Html.program
@@ -26,6 +29,8 @@ type Msg
   = Board Board.Msg
   | Reset
   | Opponent Opponent
+  | RobotMove Index
+  | Hold
 
 init : (Model, Cmd Msg)
 init =
@@ -61,25 +66,25 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Board boardMsg ->
-      case model.opponent of
-        Human -> ({model | board = Board.update boardMsg model.board}, Cmd.none)
-
-        Robot ->
-          let
-            humanMove = Board.update boardMsg model.board
-            next = nextMove humanMove
-            robotMove
-                = case next of
-                  Just idx -> Board.update (Clicked idx) humanMove
-                  Nothing -> humanMove
-          in
-            ({model | board = robotMove}, Cmd.none)
+        case model.opponent of
+            Human -> ({model | board = Board.update boardMsg model.board}, Cmd.none)
+            Robot ->
+                let
+                    humanMove = Board.update boardMsg model.board
+                in
+                    ({model | board = humanMove}, runRobot humanMove)
 
     Reset ->
       (Model Board.init model.opponent, Cmd.none)
 
     Opponent opponent ->
       (Model Board.init opponent, Cmd.none)
+
+    RobotMove idx ->
+        ({model | board = Board.update (Clicked idx) model.board}, Cmd.none)
+
+    Hold ->
+        (model, Cmd.none)
 
 -- SUBSCRIPTIONS
 
@@ -97,9 +102,19 @@ type alias Score = Int
 type alias Color = Int
 type alias Depth = Int
 
+runRobot : Board.Model -> Cmd Msg
+runRobot board =
+    Task.perform
+        (\a -> case a of
+            Just idx -> RobotMove idx
+            Nothing -> Hold)
+        (Task.andThen
+            (\_ -> Task.succeed (nextMove board))
+            (Process.sleep (50 * Time.millisecond)))
+
 nextMove : Board.Model -> Maybe Index
 nextMove board =
-    negamax scorer board 2 1 |> Tuple.second
+    negamax scorer board 3 1 |> Tuple.second
 
 -- scoreFn returns board score from O's viewpoint
 -- board is current node in the tree
