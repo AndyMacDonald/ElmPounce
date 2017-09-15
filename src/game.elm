@@ -100,7 +100,7 @@ subscriptions model =
 type alias Index = Int
 type alias Score = Int
 type alias Color = Int
-type alias Depth = Int
+type alias Budget = Int
 
 runRobot : Board.Model -> Cmd Msg
 runRobot board =
@@ -114,32 +114,33 @@ runRobot board =
 
 nextMove : Board.Model -> Maybe Index
 nextMove board =
-    negamax scorer board 3 (win * -2) (win * 2) 1 |> Tuple.second
+    negamax scorer board 5000 (win * -2) (win * 2) 1 |> Tuple.second
 
 -- scoreFn returns board score from O's viewpoint
 -- board is current node in the tree
--- depth is how many more layers to evaluate below this
+-- budget is the maximum number of board to generate in the search
 -- alpha is the lower bound of child node values at this depth
 -- beta is the uppor bound of child node values at this depth
 -- color is 1 for O and -1 for X (robot is always O)
 -- returns pair of (best score, number of square for that score)
-negamax : (Board.Model -> Score) -> Board.Model -> Depth -> Score -> Score -> Color -> (Score, Maybe Index)
-negamax scoreFn board depth alpha beta color =
-  if depth == 0 || Set.isEmpty board.moves then
+negamax : (Board.Model -> Score) -> Board.Model -> Budget -> Score -> Score -> Color -> (Score, Maybe Index)
+negamax scoreFn board budget alpha beta color =
+  if budget <= 0 || Set.isEmpty board.moves then
     (color * scoreFn board, Nothing)
   else
     let
         candidates = List.map (\x -> (x, (Board.update (Clicked x) board))) (Set.toList board.moves)
+        newBudget = budget // (Set.size board.moves) - 1
     in
-        alphaBetaPruner scoreFn candidates depth alpha beta color (-1000 * win, Nothing)
+        alphaBetaPruner scoreFn candidates newBudget alpha beta color (-1000 * win, Nothing)
 
 
-alphaBetaPruner : (Board.Model -> Score) -> List (Index, Board.Model) -> Depth -> Score -> Score -> Color -> (Score, Maybe Index) -> (Score, Maybe Index)
-alphaBetaPruner scoreFn boards depth alpha beta color best =
+alphaBetaPruner : (Board.Model -> Score) -> List (Index, Board.Model) -> Budget -> Score -> Score -> Color -> (Score, Maybe Index) -> (Score, Maybe Index)
+alphaBetaPruner scoreFn boards budget alpha beta color best =
     case boards of
         (idx, board) :: rest ->
             let
-                (negScore, i2) = negamax scorer board (depth - 1) -beta -alpha -color
+                (negScore, _) = negamax scorer board budget -beta -alpha -color
                 newBest = 
                     if Tuple.first best >= -negScore then
                         best
@@ -148,7 +149,7 @@ alphaBetaPruner scoreFn boards depth alpha beta color best =
                 newAlpha = Basics.max alpha -negScore
             in
                 if newAlpha < beta then
-                    alphaBetaPruner scoreFn rest depth alpha beta color newBest
+                    alphaBetaPruner scoreFn rest budget newAlpha beta color newBest
                 else
                     newBest
 
