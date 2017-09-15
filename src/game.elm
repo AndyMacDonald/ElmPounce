@@ -44,11 +44,11 @@ view model =
     [ h2 [] [text "Pounce"]
     , Html.p [] [text (statusText model.board)]
     , Html.map (\a -> Board a) (Board.view model.board)
-    , button [ onClick Reset ] [ text "Reset" ]
     , fieldset []
       [ radio "One player" (model.opponent == Robot) (Opponent Robot)
       , radio "Two player" (model.opponent == Human) (Opponent Human)
       ]
+    , button [ onClick Reset ] [ text "Reset" ]
     ]
 
 radio : String -> Bool -> msg -> Html msg
@@ -69,10 +69,14 @@ update msg model =
         case model.opponent of
             Human -> ({model | board = Board.update boardMsg model.board}, Cmd.none)
             Robot ->
-                let
-                    humanMove = Board.update boardMsg model.board
-                in
-                    ({model | board = humanMove}, runRobot humanMove)
+                -- Eat clicks while the robot is running
+                if model.board.next == OMove then
+                    (model, Cmd.none)
+                else
+                    let
+                        humanMove = Board.update boardMsg model.board
+                    in
+                        ({model | board = humanMove}, runRobot humanMove)
 
     Reset ->
       (Model Board.init model.opponent, Cmd.none)
