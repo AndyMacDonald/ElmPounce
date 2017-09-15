@@ -22,7 +22,7 @@ type Opponent
 
 type alias Model =
   { board : Board.Model
-  ,  opponent : Opponent
+  , opponent : Opponent
   }
 
 type Msg
@@ -114,26 +114,45 @@ runRobot board =
 
 nextMove : Board.Model -> Maybe Index
 nextMove board =
-    negamax scorer board 3 1 |> Tuple.second
+    negamax scorer board 3 (win * -2) (win * 2) 1 |> Tuple.second
 
 -- scoreFn returns board score from O's viewpoint
 -- board is current node in the tree
 -- depth is how many more layers to evaluate below this
+-- alpha is the lower bound of child node values at this depth
+-- beta is the uppor bound of child node values at this depth
 -- color is 1 for O and -1 for X (robot is always O)
 -- returns pair of (best score, number of square for that score)
-negamax : (Board.Model -> Score) -> Board.Model -> Depth -> Color -> (Score, Maybe Index)
-negamax scoreFn board depth color =
+negamax : (Board.Model -> Score) -> Board.Model -> Depth -> Score -> Score -> Color -> (Score, Maybe Index)
+negamax scoreFn board depth alpha beta color =
   if depth == 0 || Set.isEmpty board.moves then
     (color * scoreFn board, Nothing)
   else
     let
-      candidates = List.map 
-                    (\x -> (-(Tuple.first (negamax scoreFn (Board.update (Clicked x) board) (depth - 1) -color)), Just x))
-                    (Set.toList board.moves)
+        candidates = List.map (\x -> (x, (Board.update (Clicked x) board))) (Set.toList board.moves)
     in
-        case (List.sortBy (\x -> -(Tuple.first x)) candidates |> List.head) of
-            Just x -> x
-            Nothing -> (-win, Nothing)
+        alphaBetaPruner scoreFn candidates depth alpha beta color (-1000 * win, Nothing)
+
+
+alphaBetaPruner : (Board.Model -> Score) -> List (Index, Board.Model) -> Depth -> Score -> Score -> Color -> (Score, Maybe Index) -> (Score, Maybe Index)
+alphaBetaPruner scoreFn boards depth alpha beta color best =
+    case boards of
+        (idx, board) :: rest ->
+            let
+                (negScore, i2) = negamax scorer board (depth - 1) -beta -alpha -color
+                newBest = 
+                    if Tuple.first best >= -negScore then
+                        best
+                    else
+                        (-negScore, Just idx)
+                newAlpha = Basics.max alpha -negScore
+            in
+                if newAlpha < beta then
+                    alphaBetaPruner scoreFn rest depth alpha beta color newBest
+                else
+                    newBest
+
+        [] -> best
 
 scorer : Board.Model -> Score
 scorer board =
