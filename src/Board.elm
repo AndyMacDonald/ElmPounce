@@ -77,8 +77,10 @@ update msg model =
                             , moves = empty
                             , next = newNext
                             }
-                        myMoves = Set.filter (legal newModel newModel.xpos) (Set.fromList allSquares)
-                        newMoves = Set.filter (legal newModel newModel.opos) (Set.fromList allSquares)
+                        myMoves = Set.filter (legal newModel newModel.xpos)
+                                             (Set.diff (Set.fromList allSquares) newModel.blocked)
+                        newMoves = Set.filter (legal newModel newModel.opos)
+                                             (Set.diff (Set.fromList allSquares) newModel.blocked)
                         realNext =
                             if idx == model.opos then
                                 XPounced
@@ -102,8 +104,10 @@ update msg model =
                             , moves = empty
                             , next = newNext
                             }
-                        myMoves = Set.filter (legal newModel newModel.opos) (Set.fromList allSquares)
-                        newMoves = Set.filter (legal newModel newModel.xpos) (Set.fromList allSquares)
+                        myMoves = Set.filter (legal newModel newModel.opos) 
+                                             (Set.diff (Set.fromList allSquares) newModel.blocked)
+                        newMoves = Set.filter (legal newModel newModel.xpos)
+                                             (Set.diff (Set.fromList allSquares) newModel.blocked)
                         realNext =
                             if idx == model.xpos then
                                 OPounced
