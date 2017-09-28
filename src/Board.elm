@@ -124,12 +124,12 @@ update msg model =
 statusText : Model -> String
 statusText model =
     case model.next of
-        XMove -> "Green to move"
+        XMove -> "Blue to move"
         OMove -> "Red to move"
-        XBlocked -> "Green is blocked. Red wins!"
-        OBlocked -> "Red is blocked. Green wins!"
-        XPounced -> "Green pounced on red. Green wins!"
-        OPounced -> "Red pounced on green. Red wins!"
+        XBlocked -> "Blue is blocked. Red wins!"
+        OBlocked -> "Red is blocked. Blue wins!"
+        XPounced -> "Blue pounced on red. Blue wins!"
+        OPounced -> "Red pounced on blue. Red wins!"
 
 -- HELPER FUNCTIONS
 
@@ -189,11 +189,11 @@ xOrPouncedColor : Player -> Int -> Int -> String
 xOrPouncedColor player xpos opos =
     if xpos == opos then
         if player == XPounced then
-            "#00CC00"
+            "#0000DD"
         else
             "red"
     else
-        "#00CC00"
+        "#0000DD"
 
 -- GENERAL HELPERS
 
