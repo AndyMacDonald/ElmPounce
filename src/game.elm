@@ -118,7 +118,7 @@ runRobot board =
 
 nextMove : Board.Model -> Maybe Index
 nextMove board =
-    negamax scorer board 5000 (win * -2) (win * 2) 1 |> Tuple.second
+    negamax scorer board 2000 (win * -2) (win * 2) 1 |> Tuple.second
 
 -- scoreFn returns board score from O's viewpoint
 -- board is current node in the tree
