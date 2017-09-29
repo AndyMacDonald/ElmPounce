@@ -1,3 +1,15 @@
+<div id="main"></div>
+
+{% for js in page.jsarr %}
+    <script type="text/javascript">
+    {% include {{ js }} %}
+    </script>
+    <script>
+    var node = document.getElementById('main');
+    var app = Elm.Main.embed(node);
+    </script>
+{% endfor %}
+
 ## Playing the Game
 
 The game board has a grid of forty-nine squares which are all open at the start of the game.
