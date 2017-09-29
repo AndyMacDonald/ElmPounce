@@ -1,3 +1,8 @@
+---
+jsarr:
+     - assets/pounce.js
+---
+
 <div id="main"></div>
 
 {% for js in page.jsarr %}
