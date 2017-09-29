@@ -1,19 +1,12 @@
----
-jsarr:
-     - assets/pounce.js
----
-
 <div id="main"></div>
 
-{% for js in page.jsarr %}
-    <script type="text/javascript">
-    {% include {{ js }} %}
-    </script>
-    <script>
-    var node = document.getElementById('main');
-    var app = Elm.Main.embed(node);
-    </script>
-{% endfor %}
+<script type="text/javascript">
+{% include assets/pounce.js %}
+</script>
+<script>
+var node = document.getElementById('main');
+var app = Elm.Main.embed(node);
+</script>
 
 ## Playing the Game
 
