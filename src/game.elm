@@ -7,6 +7,7 @@ import Task exposing (..)
 import Process exposing (..)
 import Time exposing (..)
 
+main : Program Never Model Msg
 main =
   Html.program
     { init = init
