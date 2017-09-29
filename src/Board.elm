@@ -126,8 +126,8 @@ statusText model =
     case model.next of
         XMove -> "Blue to move"
         OMove -> "Red to move"
-        XBlocked -> "Blue is blocked. Red wins!"
-        OBlocked -> "Red is blocked. Blue wins!"
+        XBlocked -> "Blue is trapped. Red wins!"
+        OBlocked -> "Red is trapped. Blue wins!"
         XPounced -> "Blue pounced on red. Blue wins!"
         OPounced -> "Red pounced on blue. Red wins!"
 

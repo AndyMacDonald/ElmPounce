@@ -1,37 +1,9 @@
-## Welcome to GitHub Pages
+## Playing the Game
 
-You can use the [editor on GitHub](https://github.com/AndyMacDonald/ElmPounce/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+The game board has a grid of forty-nine squares which are all open at the start of the game.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+**Setup:** The first player selects a square and places his piece there with the mouse. The second player then places his piece on a different square. (Pouncing is not allowed on the first turn).
 
-### Markdown
+**How to move:** After the players have placed their pieces, they take turns moving them around the board by selecting the square they want to move to with the mouse. Pieces move like queens in chess (that is to say, any number of squares vertically, horizontally or diagonally), with the following caveat. Each square moved _from_ is filled in and becomes a block, and no player may occupy that square again, or move over or through it.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/AndyMacDonald/ElmPounce/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+**How to win:** You can win in two ways. When your opponent is on a square you may legally move to, you can capture him by moving to that square yourself. This is called _pouncing_. You also win when your opponent has no legal moves left, i.e., all his adjacent squares are filled. This is called _trapping_. Of course, you lose if you are trapped, or if your opponent pounces on you.
