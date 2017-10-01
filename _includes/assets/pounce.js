@@ -9232,9 +9232,9 @@ var _user$project$Board$statusText = function (model) {
 		case 'OMove':
 			return 'Red to move';
 		case 'XBlocked':
-			return 'Blue is blocked. Red wins!';
+			return 'Blue is trapped. Red wins!';
 		case 'OBlocked':
-			return 'Red is blocked. Blue wins!';
+			return 'Red is trapped. Blue wins!';
 		case 'XPounced':
 			return 'Blue pounced on red. Blue wins!';
 		default:
