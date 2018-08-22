@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Browser
 import Html exposing (Html, div, h2, text, button, map, fieldset, label, input)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -7,12 +8,11 @@ import Board exposing (..)
 import Set exposing (..)
 import Task exposing (..)
 import Process exposing (..)
-import Time exposing (..)
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    Html.program
+    Browser.element
         { init = init
         , view = view
         , update = update
@@ -43,8 +43,8 @@ type Msg
     | Hold
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( Model Board.init Robot, Cmd.none )
 
 
@@ -69,8 +69,7 @@ view model =
 radio : String -> Bool -> msg -> Html msg
 radio value isChecked msg =
     label
-        [ style [ ( "padding", "20px" ) ]
-        ]
+        [ style "padding" "20px" ]
         [ input [ type_ "radio", onClick msg, checked isChecked ] []
         , text value
         ]
@@ -117,7 +116,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -155,7 +154,7 @@ runRobot board =
         )
         (Task.andThen
             (\_ -> Task.succeed (nextMove board))
-            (Process.sleep (50 * Time.millisecond))
+            (Process.sleep 50)
         )
 
 
