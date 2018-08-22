@@ -6,7 +6,7 @@ module Board
         , Msg(..)
         , update
         , statusText
-        , Player(XMove, OMove, XBlocked, OBlocked, XPounced, OPounced)
+        , Player(..)
         )
 
 import Set exposing (..)
@@ -67,10 +67,10 @@ renderSquare model idx =
             idxToXY (idx)
 
         xpos =
-            toString (10 * xidx + 1)
+            String.fromInt (10 * xidx + 1)
 
         ypos =
-            toString (10 * yidx + 1)
+            String.fromInt (10 * yidx + 1)
 
         color =
             squareColor model idx
@@ -290,4 +290,4 @@ allSquares =
 
 idxToXY : Int -> ( Int, Int )
 idxToXY idx =
-    ( idx % 7, idx // 7 )
+    ( modBy 7 idx, idx // 7 )
