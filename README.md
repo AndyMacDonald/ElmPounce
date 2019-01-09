@@ -1,3 +1,5 @@
+[Run this application in your browser.](https://andymacdonald.github.io/ElmPounce/)
+
 <div id="main"></div>
 
 <script type="text/javascript">
